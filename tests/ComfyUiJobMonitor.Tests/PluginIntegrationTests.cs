@@ -76,7 +76,7 @@ public sealed class LocalizationTests
 	[Test]
 	public void The_catalog_is_scoped_to_the_plugin_id()
 	{
-		Assert.That(Strings.LocalizationCatalog.Scope, Is.EqualTo("plugin:com.yuziiv.comfyui-job-monitor"));
+		Assert.That(Strings.LocalizationCatalog.Scope, Is.EqualTo("plugin:com.yussefabdelwahab.comfyui-job-monitor"));
 	}
 
 	[Test]

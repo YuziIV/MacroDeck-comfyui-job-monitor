@@ -1,9 +1,9 @@
 {
   "$schema": "https://schemas.macro-deck.app/plugin-manifest-v1.schema.json",
   "manifestVersion": 1,
-  "id": "com.yuziiv.comfyui-job-monitor",
+  "id": "com.yussefabdelwahab.comfyui-job-monitor",
   "name": "ComfyUI Job Monitor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Provides live ComfyUI job queue variables for Macro Deck.",
   "icon": "Assets/icon.svg",
   "entrypoints": {
