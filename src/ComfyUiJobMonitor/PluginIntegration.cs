@@ -15,7 +15,8 @@ public sealed class PluginIntegration : IPluginIntegration, IVariableProvider, I
 {
 	private readonly ILogger _logger;
 	private readonly ComfyUiQueueClient _queueClient;
-	private readonly SemaphoreSlim _refreshLock = new(1, 1);
+	private Task<JobMonitorReading?>? _activeRefreshTask;
+	private readonly object _sync = new();
 	private JobMonitorReading? _cachedReading;
 	private Uri _baseAddress = new("http://127.0.0.1:8188/");
 
@@ -60,7 +61,7 @@ public sealed class PluginIntegration : IPluginIntegration, IVariableProvider, I
 
 	public Task ShutdownAsync() => Task.CompletedTask;
 
-	public void Dispose() => _refreshLock.Dispose();
+	public void Dispose() { }
 
 	public async ValueTask<VariableReading> ReadAsync(string localId, CancellationToken cancellationToken = default)
 	{
@@ -89,20 +90,42 @@ public sealed class PluginIntegration : IPluginIntegration, IVariableProvider, I
 			return cached;
 		}
 
-		await _refreshLock.WaitAsync(cancellationToken);
-		try
+		Task<JobMonitorReading?> refreshTask;
+		lock (_sync)
 		{
-			if (_cachedReading is { } refreshed && DateTimeOffset.UtcNow - refreshed.ReadAt < TimeSpan.FromSeconds(1))
+			if (_cachedReading is { } fresh && DateTimeOffset.UtcNow - fresh.ReadAt < TimeSpan.FromSeconds(1))
 			{
-				return refreshed;
+				return fresh;
 			}
 
-			_cachedReading = await _queueClient.GetReadingAsync(_baseAddress, cancellationToken);
+			if (_activeRefreshTask == null || _activeRefreshTask.IsCompleted)
+			{
+				_activeRefreshTask = RefreshInternalAsync();
+			}
+			refreshTask = _activeRefreshTask;
+		}
+
+		try
+		{
+			return await refreshTask.WaitAsync(cancellationToken);
+		}
+		catch (OperationCanceledException)
+		{
 			return _cachedReading;
 		}
-		finally
+	}
+
+	private async Task<JobMonitorReading?> RefreshInternalAsync()
+	{
+		try
 		{
-			_refreshLock.Release();
+			var reading = await _queueClient.GetReadingAsync(_baseAddress, CancellationToken.None);
+			_cachedReading = reading;
+			return reading;
+		}
+		catch
+		{
+			return _cachedReading;
 		}
 	}
 }

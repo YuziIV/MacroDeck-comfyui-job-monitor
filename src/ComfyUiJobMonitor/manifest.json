@@ -35,7 +35,7 @@
   "repository": "https://github.com/YuziIV/MacroDeck-comfyui-job-monitor",
   "ai": {
     "interaction": false,
-    "generatedContent": false,
+    "generatedContent": true,
     "generatedAssets": true
   },
   "license": "MIT",
