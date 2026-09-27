@@ -4,7 +4,11 @@ Macro Deck 3 plugin providing live ComfyUI queue and progress variables for butt
 
 ## Use
 
-Install the plugin in Macro Deck 3. Macro Deck starts the plugin and handles its connection and authorization. Complete the plugin's **Connect to ComfyUI** setup in Macro Deck with the HTTP or HTTPS address reachable from the Macro Deck computer (default `http://127.0.0.1:8188`). You can change the address in the plugin's configuration. Then select these variables in a widget:
+Install the plugin from the Macro Deck Store in the **Macro Deck desktop app**; Macro Deck starts and authorizes it. To set it up:
+
+1. Open **Integrations → ComfyUI Job Monitor** and choose **Connect to ComfyUI**.
+2. Enter the full HTTP or HTTPS address of your ComfyUI server **as seen from the computer running Macro Deck**. For ComfyUI on the same computer, use `http://127.0.0.1:8188`. Save the setup. You can change the address in the integration settings later.
+3. Add a widget such as **History Graph** or an **Action Button** in Macro Deck, and select one of these variables to show the queue status:
 
 | Variable | Meaning |
 | --- | --- |
