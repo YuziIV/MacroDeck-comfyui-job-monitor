@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schemas.macro-deck.app/plugin-manifest-v1.schema.json",
+  "manifestVersion": 1,
+  "id": "com.yuziiv.comfyui-job-monitor",
+  "name": "ComfyUI Job Monitor",
+  "version": "1.0.0",
+  "description": "Provides live ComfyUI job queue variables for Macro Deck.",
+  "icon": "Assets/icon.svg",
+  "entrypoints": {
+    "win-x64": {
+      "executable": "runtimes/win-x64/ComfyUiJobMonitor.dll",
+      "runtime": {
+        "kind": "FrameworkDependent",
+        "dotnetVersion": "10.0"
+      }
+    },
+    "osx-arm64": {
+      "executable": "runtimes/osx-arm64/ComfyUiJobMonitor.dll",
+      "runtime": {
+        "kind": "FrameworkDependent",
+        "dotnetVersion": "10.0"
+      }
+    },
+    "linux-x64": {
+      "executable": "runtimes/linux-x64/ComfyUiJobMonitor.dll",
+      "runtime": {
+        "kind": "FrameworkDependent",
+        "dotnetVersion": "10.0"
+      }
+    }
+  },
+  "publisher": {
+    "name": "Yussef Abdel-Wahab"
+  },
+  "repository": "https://github.com/YuziIV/MacroDeck-comfyui-job-monitor",
+  "ai": {
+    "interaction": false,
+    "generatedContent": false,
+    "generatedAssets": true
+  },
+  "license": "MIT",
+  "compatibility": {
+    "macroDeck": ">=3.0.0-0"
+  }
+}

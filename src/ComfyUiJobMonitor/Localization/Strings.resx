@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- The default-language file. Every translation is checked against it and the fallback chain ends
+       here, so it is required even for a plugin that ships one language. Add a language by adding
+       Localization/Strings.<culture>.resx beside it (Strings.de.resx, Strings.pt-BR.resx).
+       A dotted key becomes a nested class: Actions.LogMessage.Name is Strings.Actions.LogMessage.Name(). -->
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Plugin.Name" xml:space="preserve">
+    <value>ComfyUI Job Monitor</value>
+  </data>
+  <data name="ConfigFlow.Title" xml:space="preserve">
+    <value>Connect to ComfyUI</value>
+  </data>
+  <data name="ConfigFlow.Description" xml:space="preserve">
+    <value>Enter the address of the ComfyUI server reachable from the Macro Deck host.</value>
+  </data>
+  <data name="ConfigFlow.Address.Label" xml:space="preserve">
+    <value>ComfyUI URL</value>
+  </data>
+  <data name="ConfigFlow.InvalidAddress" xml:space="preserve">
+    <value>Enter a full HTTP or HTTPS URL without credentials, query or fragment.</value>
+  </data>
+  <data name="ConfigFlow.UnknownStep" xml:space="preserve">
+    <value>Unknown setup step.</value>
+  </data>
+</root>

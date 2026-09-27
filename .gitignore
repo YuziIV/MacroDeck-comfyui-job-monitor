@@ -1,0 +1,26 @@
+# Build, test, and release output
+**/bin/
+**/obj/
+**/TestResults/
+/artifacts/
+/conformance.md
+*.macroDeckPlugin
+*.trx
+*.log
+
+# Local SDK feed and private developer pairing state
+/local-feed/
+**/.macrodeck-dev-state/
+**/keys/
+
+# Editor and machine-specific files
+.idea/
+.vscode/
+*.user
+*.suo
+*.swp
+.DS_Store
+
+# Local agent notes
+/AGENTS.md
+/CLAUDE.md
