@@ -25,7 +25,7 @@ To test before publishing, start Macro Deck, create a one-time token under **Dev
 
 ## Build and publish
 
-Requires the .NET 10 SDK and the [Macro Deck plugin CLI](https://docs.macro-deck.app/). The packaged plugin uses the .NET 10 runtime supplied by Macro Deck 3. Supported targets: Windows x64, macOS arm64, Linux x64.
+Requires the .NET 10 SDK and the [Macro Deck plugin CLI](https://docs.macro-deck.app/). The packaged plugin uses the .NET 10 runtime supplied by Macro Deck 3. Tested hosts: Windows x64 and Linux x64. A macOS arm64 build target is included but has not been tested.
 
 ```bash
 dotnet build
