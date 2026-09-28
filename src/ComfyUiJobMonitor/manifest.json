@@ -3,7 +3,7 @@
   "manifestVersion": 1,
   "id": "com.yussefabdelwahab.comfyui-job-monitor",
   "name": "ComfyUI Job Monitor",
-  "version": "1.0.2",
+  "version": "1.0.5",
   "description": "Provides live ComfyUI job queue variables for Macro Deck.",
   "icon": "Assets/icon.svg",
   "entrypoints": {

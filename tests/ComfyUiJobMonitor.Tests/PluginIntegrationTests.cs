@@ -59,6 +59,25 @@ public sealed class PluginIntegrationTests
 		Assert.That(requests.Select(uri => uri.AbsolutePath), Is.EqualTo(new List<string> { "/instance/queue", "/instance/job-progress" }));
 	}
 
+	[Test]
+	public async Task Failed_queue_reads_are_backed_off()
+	{
+		var requestCount = 0;
+		using var client = new HttpClient(new StubHandler(_ =>
+		{
+			requestCount++;
+			throw new HttpRequestException("ComfyUI is offline");
+		}));
+		var integration = new PluginIntegration(
+			new LoggerConfiguration().CreateLogger(),
+			new ComfyUiQueueClient(client));
+
+		await integration.ReadAsync("jobs-running");
+		await integration.ReadAsync("jobs-pending");
+
+		Assert.That(requestCount, Is.EqualTo(1));
+	}
+
 	private sealed class StubHandler(Func<HttpRequestMessage, HttpResponseMessage> respond) : HttpMessageHandler
 	{
 		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

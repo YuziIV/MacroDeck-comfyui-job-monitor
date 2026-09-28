@@ -13,11 +13,22 @@ namespace ComfyUiJobMonitor;
 /// </summary>
 public sealed class PluginIntegration : IPluginIntegration, IVariableProvider, IConfigFlowProvider, IDisposable
 {
+	private static readonly TimeSpan[] _retryDelays =
+	[
+		TimeSpan.FromSeconds(5),
+		TimeSpan.FromSeconds(15),
+		TimeSpan.FromSeconds(30),
+		TimeSpan.FromMinutes(1),
+		TimeSpan.FromMinutes(5),
+	];
+
 	private readonly ILogger _logger;
 	private readonly ComfyUiQueueClient _queueClient;
 	private Task<JobMonitorReading?>? _activeRefreshTask;
 	private readonly object _sync = new();
 	private JobMonitorReading? _cachedReading;
+	private DateTimeOffset _retryAfter;
+	private int _consecutiveFailures;
 	private Uri _baseAddress = new("http://127.0.0.1:8188/");
 
 	public IConfigFlow CreateConfigFlow() => new ComfyUiConfigFlow();
@@ -45,17 +56,23 @@ public sealed class PluginIntegration : IPluginIntegration, IVariableProvider, I
 	/// </summary>
 	public async Task InitializeAsync(IIntegrationContext context)
 	{
-		_baseAddress = new Uri("http://127.0.0.1:8188/");
+		var baseAddress = new Uri("http://127.0.0.1:8188/");
 		var entries = await context.Config.GetEntriesAsync();
 		if (entries.Count > 0)
 		{
 			var address = await context.Config.GetStringAsync(entries[0].Id, ComfyUiConfigFlow.AddressField);
 			if (ComfyUiConfigFlow.TryGetAddress(address, out var uri))
 			{
-				_baseAddress = uri;
+				baseAddress = uri;
 			}
 		}
-		_cachedReading = null;
+		lock (_sync)
+		{
+			_baseAddress = baseAddress;
+			_cachedReading = null;
+			_consecutiveFailures = 0;
+			_retryAfter = default;
+		}
 		_logger.Information("Initialized.");
 	}
 
@@ -85,22 +102,23 @@ public sealed class PluginIntegration : IPluginIntegration, IVariableProvider, I
 
 	private async Task<JobMonitorReading?> GetReadingAsync(CancellationToken cancellationToken)
 	{
-		if (_cachedReading is { } cached && DateTimeOffset.UtcNow - cached.ReadAt < TimeSpan.FromSeconds(1))
-		{
-			return cached;
-		}
-
 		Task<JobMonitorReading?> refreshTask;
 		lock (_sync)
 		{
-			if (_cachedReading is { } fresh && DateTimeOffset.UtcNow - fresh.ReadAt < TimeSpan.FromSeconds(1))
+			var now = DateTimeOffset.UtcNow;
+			if (_cachedReading is { } fresh && now - fresh.ReadAt < TimeSpan.FromSeconds(1))
 			{
 				return fresh;
 			}
 
+			if (now < _retryAfter)
+			{
+				return _cachedReading;
+			}
+
 			if (_activeRefreshTask == null || _activeRefreshTask.IsCompleted)
 			{
-				_activeRefreshTask = RefreshInternalAsync();
+				_activeRefreshTask = RefreshInternalAsync(_baseAddress);
 			}
 			refreshTask = _activeRefreshTask;
 		}
@@ -111,21 +129,39 @@ public sealed class PluginIntegration : IPluginIntegration, IVariableProvider, I
 		}
 		catch (OperationCanceledException)
 		{
-			return _cachedReading;
+			lock (_sync)
+			{
+				return _cachedReading;
+			}
 		}
 	}
 
-	private async Task<JobMonitorReading?> RefreshInternalAsync()
+	private async Task<JobMonitorReading?> RefreshInternalAsync(Uri baseAddress)
 	{
+		JobMonitorReading? reading;
 		try
 		{
-			var reading = await _queueClient.GetReadingAsync(_baseAddress, CancellationToken.None);
-			_cachedReading = reading;
-			return reading;
+			reading = await _queueClient.GetReadingAsync(baseAddress, CancellationToken.None);
 		}
 		catch
 		{
-			return _cachedReading;
+			reading = null;
+		}
+
+		lock (_sync)
+		{
+			if (reading is null)
+			{
+				var delay = _retryDelays[Math.Min(_consecutiveFailures, _retryDelays.Length - 1)];
+				_consecutiveFailures++;
+				_retryAfter = DateTimeOffset.UtcNow + delay;
+				return _cachedReading;
+			}
+
+			_cachedReading = reading;
+			_consecutiveFailures = 0;
+			_retryAfter = default;
+			return reading;
 		}
 	}
 }
